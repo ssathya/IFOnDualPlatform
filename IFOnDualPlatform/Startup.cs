@@ -1,38 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 
 namespace IFOnDualPlatform
 {
 	public class Startup
 	{
+
+		#region Public Properties
+
+		public IConfiguration Configuration { get; }
+
+		#endregion Public Properties
+
+
+		#region Public Constructors
+
 		public Startup(IConfiguration configuration)
 		{
 			Configuration = configuration;
 		}
 
-		public IConfiguration Configuration { get; }
+		#endregion Public Constructors
 
-		// This method gets called by the runtime. Use this method to add services to the container.
-		public void ConfigureServices(IServiceCollection services)
-		{
-			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
-			services.AddSwaggerGen(c =>
-			{
-				c.SwaggerDoc("V3", new OpenApiInfo { Title = "Index flux", Version = "V3" });
-			});
-		}
+		#region Public Methods
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -54,5 +48,18 @@ namespace IFOnDualPlatform
 			app.UseHttpsRedirection();
 			app.UseMvc();
 		}
+
+		// This method gets called by the runtime. Use this method to add services to the container.
+		public void ConfigureServices(IServiceCollection services)
+		{
+			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+			services.AddSwaggerGen(c =>
+			{
+				c.SwaggerDoc("V3", new OpenApiInfo { Title = "Index flux", Version = "V3" });
+			});
+		}
+
+		#endregion Public Methods
 	}
 }
