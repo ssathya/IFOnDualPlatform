@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Models.Reqeusts;
 
 namespace IFOnDualPlatform.Controllers
 {
@@ -27,9 +28,13 @@ namespace IFOnDualPlatform.Controllers
 
         // POST: api/ExternalNews
         [HttpPost]
-        public void Post([FromBody] string value)
+        public IActionResult Post([FromBody] CompanyNews companyNews)
         {
-        }
+			IAppResponse appResponse = new AppResponse();
+			appResponse.ResponseData = "Response data";
+			return Ok(appResponse);
+
+		}
 
         // PUT: api/ExternalNews/5
         [HttpPut("{id}")]

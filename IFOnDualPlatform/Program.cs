@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Serilog;
 
 namespace IFOnDualPlatform
 {
@@ -9,7 +10,9 @@ namespace IFOnDualPlatform
 
 		public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
 			WebHost.CreateDefaultBuilder(args)
-				.UseStartup<Startup>();
+				.UseStartup<Startup>()
+				.UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration
+				.ReadFrom.Configuration(hostingContext.Configuration));
 
 		public static void Main(string[] args)
 		{

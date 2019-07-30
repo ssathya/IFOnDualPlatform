@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using System.IO;
 using Google.Protobuf;
 using Newtonsoft.Json.Linq;
+using Utilities.Application;
 
 namespace IFOnDualPlatform.Controllers
 {
@@ -62,7 +63,7 @@ namespace IFOnDualPlatform.Controllers
 			request.AddHeader("key", keyUsedToAccess.IsNullOrWhiteSpace() ? "" : keyUsedToAccess);
 			request.AddJsonBody(iRequest);
 			var response = clinet.Execute<AppResponse>(request).Data;
-			if (response.IsResponseSuccess)
+			if (response != null  && response.IsResponseSuccess)
 			{
 				var returnValue = new WebhookResponse
 				{
@@ -70,7 +71,10 @@ namespace IFOnDualPlatform.Controllers
 				};
 				return returnValue;
 			}
-			throw new NotImplementedException();
+			return new WebhookResponse
+			{
+				FulfillmentText = Utility.ErrorReturnMsg() + Utility.EndOfCurrentRequest()
+			};
 		}
 
 		#endregion Public Methods
