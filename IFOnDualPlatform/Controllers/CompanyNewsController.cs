@@ -5,13 +5,23 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Models.Reqeusts;
+using Microsoft.Extensions.Logging;
+using Utilities.Application;
 
 namespace IFOnDualPlatform.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ExternalNewsController : ControllerBase
+	public class CompanyNewsController : ControllerBase
     {
+		private readonly ILogger<CompanyNewsController> _logger;
+		private readonly EnvHandler _envHandler;
+
+		public CompanyNewsController(ILogger<CompanyNewsController> logger, EnvHandler envHandler)
+		{
+			_logger = logger;
+			_envHandler = envHandler;
+		}
         // GET: api/ExternalNews
         [HttpGet]
         public IEnumerable<string> Get()
@@ -30,8 +40,12 @@ namespace IFOnDualPlatform.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] CompanyNews companyNews)
         {
-			IAppResponse appResponse = new AppResponse();
-			appResponse.ResponseData = "Response data";
+			_logger.LogInformation("In Company News Controller");
+			IAppResponse appResponse = new AppResponse
+			{
+				ResponseData = "Response data",
+				IsResponseSuccess = true
+			};
 			return Ok(appResponse);
 
 		}

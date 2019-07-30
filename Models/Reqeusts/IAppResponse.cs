@@ -8,5 +8,6 @@ namespace Models.Reqeusts
 		DateTime ResponseCreateTime { get; set; }
 		bool IsResponseSsml { get; set; }
 		string ResponseData { get; set; }
+		bool IsResponseSuccess { get; set; }
 	}
 }

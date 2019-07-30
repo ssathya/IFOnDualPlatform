@@ -30,12 +30,31 @@ namespace IFOnDualPlatform.Controllers
 		//public IActionResult Post([FromBody] WebhookRequest value)
 		public IActionResult Post()
 		{
+			_logger.LogDebug("Entering Google Fulfillment Post");
 			string requestBody = new StreamReader(Request.Body).ReadToEndAsync().Result;
 			
 			var parserResult = JObject.Parse(requestBody);
 			var value = jsonParser.Parse<WebhookRequest>(requestBody);
 			WebhookResponse response =  ProcessWebhookRequests(value);
-			return Ok(response);
+			response = CheckAndAddEndOfMessage(response);
+			var returnString = response.ToString();
+			return new ContentResult
+			{
+				Content = returnString,
+				ContentType = "application/json",
+				StatusCode = 200
+			};
+		}
+
+		private WebhookResponse CheckAndAddEndOfMessage(WebhookResponse response)
+		{
+			if (response.FulfillmentMessages.Count == 0 && 
+				!response.FulfillmentText.Contains(Utility.EndOfCurrentRequest()))
+			{
+				response.FulfillmentText = response.FulfillmentText + "\n" +
+					Utility.EndOfCurrentRequest();
+			}
+			return response;
 		}
 
 		private WebhookResponse ProcessWebhookRequests(WebhookRequest value)
