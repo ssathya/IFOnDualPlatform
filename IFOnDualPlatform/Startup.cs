@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using IFOnDualPlatform.Extensions;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -58,6 +59,8 @@ namespace IFOnDualPlatform
 			{
 				c.SwaggerDoc("V3", new OpenApiInfo { Title = "Index flux", Version = "V3" });
 			});
+			services.AddKeysToEnvironment();
+			services.SetupDependencies();
 		}
 
 		#endregion Public Methods
