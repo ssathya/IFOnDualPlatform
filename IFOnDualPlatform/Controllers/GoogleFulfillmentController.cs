@@ -67,6 +67,7 @@ namespace IFOnDualPlatform.Controllers
 				case "companyNews":
 					controllerName = "companyNews";
 					var company = value.QueryResult.Parameters.Fields["companyName"].ToString();
+					company = company.StripSpecialChar();
 					iRequest = new CompanyNews { CompanyName = company };
 					break;
 				case "newsFetch":					

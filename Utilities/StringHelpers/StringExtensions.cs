@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using Google.Cloud.Translation.V2;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -7,6 +8,7 @@ namespace Utilities.StringHelpers
 {
 	public static class StringExtensions
 	{
+
 		#region Public Methods
 
 		/// <summary>
@@ -14,7 +16,7 @@ namespace Utilities.StringHelpers
 		/// </summary>
 		/// <param name="inString">The in string.</param>
 		/// <returns></returns>
-		public static string ConvertAllToASCII(string inString)
+		public static string ConvertAllToASCII(this string inString)
 		{
 			var newStringBuilder = new StringBuilder();
 			newStringBuilder.Append(inString.Normalize(NormalizationForm.FormKD)
@@ -38,6 +40,16 @@ namespace Utilities.StringHelpers
 			return retValue;
 		}
 
+		public static bool IsEnglish(this string inputString)
+		{
+			//var stringToUse = string.Join(" ", inputString.Split(' ').Take(3));
+			using (var client = TranslationClient.Create())
+			{
+				var detection = client.DetectLanguage(inputString);
+				return detection.Language == "en" ? true : false;
+			}
+		}
+
 		/// <summary>
 		/// Determines whether string [is null or white space].
 		/// </summary>
@@ -49,7 +61,6 @@ namespace Utilities.StringHelpers
 		{
 			return string.IsNullOrWhiteSpace(value);
 		}
-
 		/// <summary>
 		/// Replaces the first.
 		/// </summary>
@@ -66,7 +77,15 @@ namespace Utilities.StringHelpers
 			}
 			return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
 		}
-
+		public static string StripSpecialChar(this string text)
+		{
+			string pattern = @"(\""|\.|\?|\$\!)";
+			string substitution = @"";						
+			RegexOptions options = RegexOptions.Multiline;
+			Regex regex = new Regex(pattern, options);
+			var stripped = regex.Replace(text, substitution);
+			return stripped;
+		}
 		/// <summary>
 		/// Converts to Thousands, millions, and billions.
 		/// </summary>
@@ -109,5 +128,6 @@ namespace Utilities.StringHelpers
 		}
 
 		#endregion Public Methods
+
 	}
 }

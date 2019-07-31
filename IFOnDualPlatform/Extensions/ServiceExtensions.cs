@@ -1,4 +1,5 @@
 ﻿using Amazon;
+using ExternalInterface.BusLogic;
 using Microsoft.Extensions.DependencyInjection;
 using Models.Application;
 using Newtonsoft.Json;
@@ -34,6 +35,7 @@ namespace IFOnDualPlatform.Extensions
 		public static void SetupDependencies(this IServiceCollection services)
 		{
 			services.AddScoped<EnvHandler>();
+			services.AddScoped<ObtainNews>();
 		}
 	}
 }

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Models.Reqeusts;
 using Microsoft.Extensions.Logging;
 using Utilities.Application;
+using ExternalInterface.BusLogic;
 
 namespace IFOnDualPlatform.Controllers
 {
@@ -15,51 +16,30 @@ namespace IFOnDualPlatform.Controllers
 	public class CompanyNewsController : ControllerBase
     {
 		private readonly ILogger<CompanyNewsController> _logger;
-		private readonly EnvHandler _envHandler;
+		private readonly ObtainNews _obtainNews;
 
-		public CompanyNewsController(ILogger<CompanyNewsController> logger, EnvHandler envHandler)
+		public CompanyNewsController(ILogger<CompanyNewsController> logger, ObtainNews obtainNews)
 		{
 			_logger = logger;
-			_envHandler = envHandler;
+			_obtainNews = obtainNews;
+
+
 		}
-        // GET: api/ExternalNews
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
-        // GET: api/ExternalNews/5
-        [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-
+       
         // POST: api/ExternalNews
         [HttpPost]
-        public IActionResult Post([FromBody] CompanyNews companyNews)
+        public async Task<IActionResult> PostAsync([FromBody] CompanyNews companyNews)
         {
 			_logger.LogInformation("In Company News Controller");
+			string newsToReport = await _obtainNews.GetCompanyNewsAsync(companyNews.CompanyName);
 			IAppResponse appResponse = new AppResponse
 			{
-				ResponseData = "Response data",
+				ResponseData = newsToReport,
 				IsResponseSuccess = true
 			};
 			return Ok(appResponse);
 
 		}
 
-        // PUT: api/ExternalNews/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
-    }
+	}
 }
