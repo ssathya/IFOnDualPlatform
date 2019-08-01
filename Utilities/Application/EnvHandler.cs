@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
+using Utilities.StringHelpers;
 
 namespace Utilities.Application
 {
@@ -20,6 +21,11 @@ namespace Utilities.Application
 			_log = log;
 		}
 
+		public EnvHandler()
+		{
+			_log = null;
+		}
+
 		#endregion Public Constructors
 
 
@@ -27,25 +33,42 @@ namespace Utilities.Application
 
 		public string GetApiKey(string provider)
 		{
-			var apiKey = Environment.GetEnvironmentVariable(provider, EnvironmentVariableTarget.Process);
-			if (string.IsNullOrWhiteSpace(apiKey))
+			var apiKey = Environment.GetEnvironmentVariable(provider);
+			if (!apiKey.IsNullOrWhiteSpace())
 			{
-				_log.LogDebug("Did not find api key in process");
+				return apiKey;
+			}
+			apiKey = Environment.GetEnvironmentVariable(provider, EnvironmentVariableTarget.Process);
+			if (apiKey.IsNullOrWhiteSpace())
+			{
+				if (_log != null)
+				{
+					_log.LogDebug("Did not find api key in process");
+				}
 				apiKey = Environment.GetEnvironmentVariable(provider, EnvironmentVariableTarget.Machine);
 			}
-			if (string.IsNullOrWhiteSpace(apiKey))
+			if (apiKey.IsNullOrWhiteSpace())
 			{
-				_log.LogDebug("Did not find api key in Machine");
+				if (_log != null)
+				{
+					_log.LogDebug("Did not find api key in Machine");
+				}
 				apiKey = Environment.GetEnvironmentVariable(provider, EnvironmentVariableTarget.User);
 			}
-			if (string.IsNullOrWhiteSpace(apiKey))
+			if (apiKey.IsNullOrWhiteSpace())
 			{
-				_log.LogDebug("Did not find api key in Machine");
+				if (_log != null)
+				{
+					_log.LogDebug("Did not find api key in User");
+				}
 				apiKey = Environment.GetEnvironmentVariable("NewsAPI");
 			}
-			if (string.IsNullOrWhiteSpace(apiKey))
+			if (apiKey.IsNullOrWhiteSpace())
 			{
-				_log.LogError($"Did not find api key for {provider}; calls will fail");
+				if (_log != null)
+				{
+					_log.LogError($"Did not find api key for {provider}; calls will fail");
+				}
 			}
 			return apiKey;
 		}
