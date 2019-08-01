@@ -2,9 +2,9 @@
 
 namespace Models.Reqeusts
 {
-	public class CompanyNews : IAppRequest
+	public class StandardNews : IAppRequest
 	{
-		public CompanyNews()
+		public StandardNews()
 		{
 			RequestStart = DateTime.Now;
 			IsSsmlResponseRequested = false;
@@ -12,7 +12,7 @@ namespace Models.Reqeusts
 
 		public string RequestName { get; set; }
 		public DateTime RequestStart { get; set; }
-		public string CompanyName { get; set; }
 		public bool IsSsmlResponseRequested { get; set; }
+		public string NewsSource { get; set; }
 	}
 }
