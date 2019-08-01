@@ -1,13 +1,25 @@
-﻿using Google.Cloud.Translation.V2;
+﻿using Models.Application;
+using Newtonsoft.Json;
+using System;
 using System.Globalization;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using Utilities.Application;
 
 namespace Utilities.StringHelpers
 {
 	public static class StringExtensions
 	{
+
+		#region Private Fields
+
+		private const string HostName = "https://api.cognitive.microsofttranslator.com";
+		private const string KeyForTraslator = "ssTranslatorService0801";
+		private const string RouteName = "/detect?api-version=3.0";
+
+		#endregion Private Fields
 
 		#region Public Methods
 
@@ -42,12 +54,11 @@ namespace Utilities.StringHelpers
 
 		public static bool IsEnglish(this string inputString)
 		{
-			//var stringToUse = string.Join(" ", inputString.Split(' ').Take(3));
-			using (var client = TranslationClient.Create())
-			{
-				var detection = client.DetectLanguage(inputString);
-				return detection.Language == "en" ? true : false;
-			}
+			var envHandler = new EnvHandler();
+			var key = envHandler.GetApiKey(KeyForTraslator);
+			string host = HostName;
+			string route = RouteName;
+			return DetectTextRequest(key, host, route, inputString.TruncateAtWord(50));
 		}
 
 		/// <summary>
@@ -61,6 +72,7 @@ namespace Utilities.StringHelpers
 		{
 			return string.IsNullOrWhiteSpace(value);
 		}
+
 		/// <summary>
 		/// Replaces the first.
 		/// </summary>
@@ -77,15 +89,17 @@ namespace Utilities.StringHelpers
 			}
 			return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
 		}
+
 		public static string StripSpecialChar(this string text)
 		{
 			string pattern = @"(\""|\.|\?|\$\!)";
-			string substitution = @"";						
+			string substitution = @"";
 			RegexOptions options = RegexOptions.Multiline;
 			Regex regex = new Regex(pattern, options);
 			var stripped = regex.Replace(text, substitution);
 			return stripped;
 		}
+
 		/// <summary>
 		/// Converts to Thousands, millions, and billions.
 		/// </summary>
@@ -129,5 +143,37 @@ namespace Utilities.StringHelpers
 
 		#endregion Public Methods
 
+
+		#region Private Methods
+
+		private static bool DetectTextRequest(string subscriptionKey, string host, string route, string inputText)
+		{
+			object[] body = new object[] { new { Text = inputText } };
+			var requestBody = JsonConvert.SerializeObject(body);
+
+			using (var client = new HttpClient())
+			using (var request = new HttpRequestMessage())
+			{
+				// Build the request.
+				request.Method = HttpMethod.Post;
+				request.RequestUri = new Uri(host + route);
+				request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
+				request.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+
+				// Send the request and get response.
+				//HttpResponseMessage response = await client.SendAsync(request).ConfigureAwait(false);
+				var response = client.SendAsync(request).Result;
+				// Read response as a string.
+				string result = response.Content.ReadAsStringAsync().Result;
+				DetectResult[] deserializedOutput = JsonConvert.DeserializeObject<DetectResult[]>(result);
+				if (deserializedOutput.Any() == false)
+				{
+					return false;
+				}
+				return deserializedOutput[0].Language == "en";
+			}
+		}
+
+		#endregion Private Methods
 	}
 }
