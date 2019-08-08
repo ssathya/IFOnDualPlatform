@@ -42,13 +42,19 @@ namespace Utilities.StringHelpers
 		/// </summary>
 		/// <param name="unformatedMsg">The unformated MSG.</param>
 		/// <returns></returns>
-		public static string ConvertToSSML(string unformatedMsg)
+		public static string ConvertToSSML(this string unformatedMsg)
 		{
+
 			StringBuilder tempValue = new StringBuilder();
+			unformatedMsg = unformatedMsg.Replace("&", " and ")
+				.Replace(">", " greater than ")
+				.Replace("<", " less than ")
+				.Replace("'", "")
+				.Replace("\"", "");
 			tempValue.Append("<speak>");
 			tempValue.Append(unformatedMsg);
 			tempValue.Append("</speak>");
-			var retValue = Regex.Replace(tempValue.ToString(), @"\r\n?|\n|\\n|\\r\\n", @"<break strength='x - strong' time='500ms' />");
+			var retValue = Regex.Replace(tempValue.ToString(), @"\r\n?|\n|\\n|\\r\\n", @"<break time='750ms'/>");
 			return retValue;
 		}
 
