@@ -55,7 +55,7 @@ namespace ExternalInterface.BusLogic
 				}
 				var newsData = JsonConvert.DeserializeObject<NewsExtract>(data);
 				var returnString = new StringBuilder();
-				returnString.Append($"Here are the lastest news about {companyName}");
+				returnString.Append($"Here are the latest news about {companyName}");
 				var publishedDate = DateTime.Now.AddYears(-1);
 				foreach (var article in newsData.articles.OrderByDescending(a => a.publishedAt))
 				{
@@ -132,7 +132,7 @@ namespace ExternalInterface.BusLogic
 			{
 				returnMsg.Append(article.title + ".\n");
 			}
-			return returnMsg.ToString();
+			return returnMsg.ToString().ConvertAllToASCII();
 		}
 		private async Task<NewsExtract> ObtainNewAPIDta(string urlToUse)
 		{

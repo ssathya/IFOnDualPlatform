@@ -10,6 +10,7 @@ using System.IO;
 using Google.Protobuf;
 using Newtonsoft.Json.Linq;
 using Utilities.Application;
+using IFOnDualPlatform.Methods;
 
 namespace IFOnDualPlatform.Controllers
 {
@@ -21,6 +22,7 @@ namespace IFOnDualPlatform.Controllers
 		#region Private Fields
 
 		private readonly ILogger<GoogleFulfillmentController> _logger;
+		private readonly ICommonMethods _commonMethods;
 		private readonly JsonParser jsonParser;
 
 		#endregion Private Fields
@@ -28,9 +30,10 @@ namespace IFOnDualPlatform.Controllers
 
 		#region Public Constructors
 
-		public GoogleFulfillmentController(ILogger<GoogleFulfillmentController> logger)
+		public GoogleFulfillmentController(ILogger<GoogleFulfillmentController> logger, ICommonMethods commonMethods)
 		{
 			_logger = logger;
+			_commonMethods = commonMethods;
 			jsonParser = new JsonParser(JsonParser.Settings.Default.WithIgnoreUnknownFields(true));
 		}
 
@@ -44,9 +47,7 @@ namespace IFOnDualPlatform.Controllers
 		public IActionResult Post()
 		{
 			_logger.LogDebug("Entering Google Fulfillment Post");
-			string requestBody = new StreamReader(Request.Body).ReadToEndAsync().Result;
-			
-			var parserResult = JObject.Parse(requestBody);
+			string requestBody = new StreamReader(Request.Body).ReadToEndAsync().Result;						
 			var value = jsonParser.Parse<WebhookRequest>(requestBody);
 			WebhookResponse response =  ProcessWebhookRequests(value);
 			response = CheckAndAddEndOfMessage(response);
@@ -64,26 +65,7 @@ namespace IFOnDualPlatform.Controllers
 
 		#region Private Methods
 
-		private static void ProcessIntends(WebhookRequest value, string intentName, ref IAppRequest iRequest, ref string controllerName)
-		{
-			switch (intentName)
-			{
-				case "companyNews":
-					controllerName = "companyNews";
-					var company = value.QueryResult.Parameters.Fields["companyName"].ToString();
-					company = company.StripSpecialChar();
-					iRequest = new CompanyNews { CompanyName = company };
-					break;
-				case "newsFetch":
-					controllerName = "NewsFetch";
-					var newsSource = value.QueryResult.Parameters.Fields["newsSource"].ToString();
-					newsSource = newsSource.StripSpecialChar();
-					iRequest = new StandardNews { NewsSource = newsSource };
-					break;
-				default:
-					break;
-			}
-		}
+		
 
 		private WebhookResponse CheckAndAddEndOfMessage(WebhookResponse response)
 		{
@@ -101,8 +83,8 @@ namespace IFOnDualPlatform.Controllers
 			var intentName = value.QueryResult.Intent.DisplayName;
 			IAppRequest iRequest = null;
 			string controllerName = "";
-			ProcessIntends(value, intentName, ref iRequest, ref controllerName);
-			SetupAPICall(iRequest, controllerName, out RestClient clinet, out RestRequest request);
+			_commonMethods.ProcessIntends(value, intentName, ref iRequest, ref controllerName);
+			_commonMethods.SetupAPICall(iRequest, controllerName, out RestClient clinet, out RestRequest request, Request);
 			var response = clinet.Execute<AppResponse>(request).Data;
 			if (response != null && response.IsResponseSuccess)
 			{
@@ -118,17 +100,7 @@ namespace IFOnDualPlatform.Controllers
 			};
 		}
 
-		private void SetupAPICall(IAppRequest iRequest, string controllerName, out RestClient clinet, out RestRequest request)
-		{
-			controllerName = "/api/" + controllerName;
-			var baseURL = Request.Host.ToString();
-			var keyUsedToAccess = Request.Headers["key"].ToString();
-			clinet = new RestClient("https://" + baseURL);
-			request = new RestRequest(controllerName, Method.POST);
-			request.AddHeader("key", keyUsedToAccess.IsNullOrWhiteSpace() ? "" : keyUsedToAccess);
-			request.AddJsonBody(iRequest);
-			return;
-		}
+		
 
 		#endregion Private Methods
 	}
