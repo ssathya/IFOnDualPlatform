@@ -38,6 +38,9 @@ namespace IFOnDualPlatform.Extensions
 			services.AddScoped<EnvHandler>();
 			services.AddScoped<ObtainNews>();
 			services.AddScoped<ICommonMethods, CommonMethods>();
+			services.AddScoped<ResolveCompanyName>();
+			services.AddScoped<EnvHandler>();
+			services.AddScoped<ObtainStockQuote>();
 		}
 	}
 }

@@ -98,7 +98,10 @@ namespace IFOnDualPlatform.Methods
 					var newsSource = value.QueryResult.Parameters.Fields["newsSource"].ToString();
 					entityOrSlot = newsSource;
 					break;
-
+				case "stockQuote":
+					var companyName = value.QueryResult.Parameters.Fields["CompanyName"].ToString();
+					entityOrSlot = companyName;
+					break;
 				default:
 					return;
 			}
@@ -129,8 +132,10 @@ namespace IFOnDualPlatform.Methods
 					}
 					entityOrSlot = newsSource;
 					break;
-
-
+				case "stockQuote":
+					company = intentRequest.Intent.Slots["CompanyName"].Value;
+					entityOrSlot = company.StripSpecialChar();
+					break;
 
 				//Unique to Alexa
 				case "AMAZON.FallbackIntent":
@@ -191,7 +196,7 @@ namespace IFOnDualPlatform.Methods
 					controllerName = "companyNews";
 					var company = entityOrSlot;
 					company = company.StripSpecialChar();
-					iRequest = new CompanyNews { CompanyName = company };
+					iRequest = new CompanyData { CompanyName = company };
 					break;
 
 				case "newsFetch":
@@ -199,6 +204,11 @@ namespace IFOnDualPlatform.Methods
 					var newsSource = entityOrSlot;
 					newsSource = newsSource.StripSpecialChar();
 					iRequest = new StandardNews { NewsSource = newsSource };
+					break;
+				case "stockQuote":
+					controllerName = "StockQuote";
+					company = entityOrSlot.StripSpecialChar();
+					iRequest = new CompanyData { CompanyName = company };
 					break;
 				default:
 					break;
