@@ -28,7 +28,7 @@ namespace IFOnDualPlatform.Controllers
        
         // POST: api/ExternalNews
         [HttpPost]
-        public async Task<IActionResult> PostAsync([FromBody] CompanyNews companyNews)
+        public async Task<IActionResult> PostAsync([FromBody] CompanyData companyNews)
         {
 			_logger.LogInformation("In Company News Controller");
 			string newsToReport = await _obtainNews.GetCompanyNewsAsync(companyNews.CompanyName);
