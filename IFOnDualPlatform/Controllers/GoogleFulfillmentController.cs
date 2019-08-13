@@ -1,16 +1,12 @@
 ﻿using Google.Cloud.Dialogflow.V2;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
-using RestSharp;
-using Utilities.StringHelpers;
-using Models.Reqeusts;
-using Microsoft.Extensions.Logging;
-using System.IO;
 using Google.Protobuf;
-using Newtonsoft.Json.Linq;
-using Utilities.Application;
 using IFOnDualPlatform.Methods;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Models.Reqeusts;
+using RestSharp;
+using System.IO;
+using Utilities.Application;
 
 namespace IFOnDualPlatform.Controllers
 {
@@ -18,7 +14,6 @@ namespace IFOnDualPlatform.Controllers
 	[ApiController]
 	public class GoogleFulfillmentController : ControllerBase
 	{
-
 		#region Private Fields
 
 		private readonly ILogger<GoogleFulfillmentController> _logger;
@@ -26,7 +21,6 @@ namespace IFOnDualPlatform.Controllers
 		private readonly JsonParser jsonParser;
 
 		#endregion Private Fields
-
 
 		#region Public Constructors
 
@@ -47,9 +41,9 @@ namespace IFOnDualPlatform.Controllers
 		public IActionResult Post()
 		{
 			_logger.LogDebug("Entering Google Fulfillment Post");
-			string requestBody = new StreamReader(Request.Body).ReadToEndAsync().Result;						
+			string requestBody = new StreamReader(Request.Body).ReadToEndAsync().Result;
 			var value = jsonParser.Parse<WebhookRequest>(requestBody);
-			WebhookResponse response =  ProcessWebhookRequests(value);
+			WebhookResponse response = ProcessWebhookRequests(value);
 			response = CheckAndAddEndOfMessage(response);
 			var returnString = response.ToString();
 			return new ContentResult
@@ -62,14 +56,11 @@ namespace IFOnDualPlatform.Controllers
 
 		#endregion Public Methods
 
-
 		#region Private Methods
-
-		
 
 		private WebhookResponse CheckAndAddEndOfMessage(WebhookResponse response)
 		{
-			if (response.FulfillmentMessages.Count == 0 && 
+			if (response.FulfillmentMessages.Count == 0 &&
 				!response.FulfillmentText.Contains(Utility.EndOfCurrentRequest()))
 			{
 				response.FulfillmentText = response.FulfillmentText + "\n" +
@@ -85,7 +76,8 @@ namespace IFOnDualPlatform.Controllers
 			string controllerName = "";
 			_commonMethods.ProcessIntends(value, intentName, ref iRequest, ref controllerName);
 			_commonMethods.SetupAPICall(iRequest, controllerName, out RestClient clinet, out RestRequest request, Request);
-			var response = clinet.Execute<AppResponse>(request).Data;
+			var responseResult = clinet.Execute<AppResponse>(request);
+			var response = responseResult.Data;
 			if (response != null && response.IsResponseSuccess)
 			{
 				var returnValue = new WebhookResponse
@@ -99,8 +91,6 @@ namespace IFOnDualPlatform.Controllers
 				FulfillmentText = Utility.ErrorReturnMsg() + Utility.EndOfCurrentRequest()
 			};
 		}
-
-		
 
 		#endregion Private Methods
 	}

@@ -69,10 +69,10 @@ namespace ExternalInterface.BusLogic
 							}
 							publishedDate = article.publishedAt;
 							var dateStr = publishedDate.ToString("MMMM dd");
-							returnString.Append($". \r\nThe followin were published on {dateStr}\r\n");
+							returnString.Append($". \r\nThe followin were published on {dateStr}.\r\n");
 						}
 						returnString.Append(article.title);
-						returnString.Append("\r\n");
+						returnString.Append(".\r\n");
 					}
 				}
 				return returnString.ToString();
