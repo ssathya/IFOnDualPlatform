@@ -99,6 +99,7 @@ namespace IFOnDualPlatform.Methods
 					entityOrSlot = newsSource;
 					break;
 				case "stockQuote":
+				case "fundamentals":
 					var companyName = value.QueryResult.Parameters.Fields["CompanyName"].ToString();
 					entityOrSlot = companyName;
 					break;
@@ -133,6 +134,7 @@ namespace IFOnDualPlatform.Methods
 					entityOrSlot = newsSource;
 					break;
 				case "stockQuote":
+				case "fundamentals":
 					company = intentRequest.Intent.Slots["CompanyName"].Value;
 					entityOrSlot = company.StripSpecialChar();
 					break;
@@ -207,6 +209,11 @@ namespace IFOnDualPlatform.Methods
 					break;
 				case "stockQuote":
 					controllerName = "StockQuote";
+					company = entityOrSlot.StripSpecialChar();
+					iRequest = new CompanyData { CompanyName = company };
+					break;
+				case "fundamentals":
+					controllerName = "Fundamentals";
 					company = entityOrSlot.StripSpecialChar();
 					iRequest = new CompanyData { CompanyName = company };
 					break;

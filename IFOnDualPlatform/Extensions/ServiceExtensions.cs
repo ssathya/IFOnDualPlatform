@@ -1,8 +1,10 @@
 ﻿using Amazon;
+using AutoMapper;
 using ExternalInterface.BusLogic;
 using IFOnDualPlatform.Methods;
 using Microsoft.Extensions.DependencyInjection;
 using Models.Application;
+using MongoHandler;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -35,12 +37,24 @@ namespace IFOnDualPlatform.Extensions
 		}
 		public static void SetupDependencies(this IServiceCollection services)
 		{
-			services.AddScoped<EnvHandler>();
-			services.AddScoped<ObtainNews>();
+			services.AddScoped<EnvHandler>();			
 			services.AddScoped<ICommonMethods, CommonMethods>();
-			services.AddScoped<ResolveCompanyName>();
-			services.AddScoped<EnvHandler>();
+			services.AddScoped<IDBConnectionHandler<PiotroskiScoreMd>, DBConnectionHandler<PiotroskiScoreMd>>();
+			services.AddScoped<ObtainFundamentals>();
+			services.AddScoped<ObtainNews>();
 			services.AddScoped<ObtainStockQuote>();
+			services.AddScoped<ResolveCompanyName>();
+		}
+		public static void SetupMappings(this IServiceCollection services)
+		{
+			var config = new MapperConfiguration(cfg =>
+			{
+				cfg.CreateMap<PiotroskiScore, PiotroskiScoreMd>()
+				.ForMember(d => d.Id, t => t.Ignore())
+					.ReverseMap();
+			});
+			var mapper = config.CreateMapper();
+			services.AddSingleton(mapper);
 		}
 	}
 }

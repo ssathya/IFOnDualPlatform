@@ -10,13 +10,11 @@ namespace IFOnDualPlatform
 {
 	public class Startup
 	{
-
 		#region Public Properties
 
 		public IConfiguration Configuration { get; }
 
 		#endregion Public Properties
-
 
 		#region Public Constructors
 
@@ -61,6 +59,7 @@ namespace IFOnDualPlatform
 			});
 			services.AddKeysToEnvironment();
 			services.SetupDependencies();
+			services.SetupMappings();
 		}
 
 		#endregion Public Methods
