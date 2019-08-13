@@ -34,7 +34,6 @@ namespace ExternalInterface.BusLogic
 
 		#endregion Private Fields
 
-
 		#region Public Constructors
 
 		/// <summary>
@@ -78,7 +77,7 @@ namespace ExternalInterface.BusLogic
 					var ratingsMd = _connectionHandlerCF.Get().Where(x => x.Ticker.ToLower().Equals(ticker.ToLower()))
 						.OrderByDescending(x => x.FYear).FirstOrDefault();
 					PiotroskiScore computedRating = null;
-					
+
 					if (ratingsMd != null && DateTime.Now.Year - ratingsMd.FYear <= 2)
 					{
 						computedRating = _mapper.Map<PiotroskiScore>(ratingsMd);
@@ -96,7 +95,6 @@ namespace ExternalInterface.BusLogic
 			}
 			catch (Exception ex)
 			{
-
 				_logger.LogCritical($"Error while processing Get Company Fundamentals; \n{ex.Message}");
 				return "";
 			}
@@ -187,14 +185,14 @@ namespace ExternalInterface.BusLogic
 			else
 			{
 				returnText.Append($"Basic information about {companyOverview.CompanyName} trading with symbol {symbol}.\n");
-				returnText.Append($" {(companyOverview.Description.IsNullOrWhiteSpace() ? "This information is not available now" : companyOverview.Description.TruncateAtWord(200))}\n");
-				if (companyOverview.Description.Length >= 201)
+				returnText.Append($" {(companyOverview.Description.IsNullOrWhiteSpace() ? "This information is not available now" : companyOverview.Description.TruncateAtWord(175))}\n");
+				if (companyOverview.Description.Length >= 175)
 				{
 					returnText.Append("\n\n..... more removed. ....\n\n");
 				}
 				returnText.Append($" Its industry sector is {companyOverview.Sector} and falls under {companyOverview.Industry}.\n\n ");
-				returnText.Append($" {companyOverview.CompanyName} has a market cap of {((decimal)companyStats.marketcap).ToKMB()} " +
-					$" TTM E P S of about {((decimal)companyStats.ttmEPS).ToKMB()} and  divident rate around {((decimal)companyStats.ttmDividendRate).ToKMB()}.\n");
+				returnText.Append($" {companyOverview.CompanyName} has a market cap of {((decimal)companyStats.marketcap).ToKMB()}, " +
+					$" TTM E P S of about {((decimal)companyStats.ttmEPS).ToKMB()}, and  divident rate around {((decimal)companyStats.ttmDividendRate).ToKMB()}.\n");
 			}
 			switch (companyOverview.IssueType.ToLower())
 			{
@@ -235,8 +233,8 @@ namespace ExternalInterface.BusLogic
 					break;
 			}
 			return returnText.ToString();
-			
 		}
+
 		private StringBuilder BuildRatingsMessage(Ratings ratingsToUse, int totalRatings, string symbol)
 		{
 			var returnString = new StringBuilder();
@@ -256,6 +254,7 @@ namespace ExternalInterface.BusLogic
 			returnString.Append($" with an average rating of {ratingsToUse.RatingScaleMark.ToString("n1")}.\n\n 1 being strong buy 5 is a strong sell.\n\n");
 			return returnString;
 		}
+
 		private async Task<CompanyOverview> ObtainCompanyOverview(string ticker)
 		{
 			var urlToUse = iexCompanyDetailsURL.Replace("{ticker}", ticker)
@@ -279,8 +278,9 @@ namespace ExternalInterface.BusLogic
 					_logger.LogError(ex.InnerException.Message);
 				}
 				return new CompanyOverview();
-			}			
+			}
 		}
+
 		private async Task<CompanyKeyStats> ObtainCompanyStats(string ticker)
 		{
 			var urlToUse = iexCompanyStatssURL.Replace("{ticker}", ticker)
@@ -306,6 +306,7 @@ namespace ExternalInterface.BusLogic
 				return new CompanyKeyStats();
 			}
 		}
+
 		#endregion Private Methods
 	}
 }
