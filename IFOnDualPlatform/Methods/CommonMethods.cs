@@ -103,6 +103,9 @@ namespace IFOnDualPlatform.Methods
 					var companyName = value.QueryResult.Parameters.Fields["CompanyName"].ToString();
 					entityOrSlot = companyName;
 					break;
+				case "marketSummary":
+					entityOrSlot = "";
+					break;
 				default:
 					return;
 			}
@@ -137,6 +140,9 @@ namespace IFOnDualPlatform.Methods
 				case "fundamentals":
 					company = intentRequest.Intent.Slots["CompanyName"].Value;
 					entityOrSlot = company.StripSpecialChar();
+					break;
+				case "marketSummary":
+					entityOrSlot = "";
 					break;
 
 				//Unique to Alexa
@@ -216,6 +222,10 @@ namespace IFOnDualPlatform.Methods
 					controllerName = "Fundamentals";
 					company = entityOrSlot.StripSpecialChar();
 					iRequest = new CompanyData { CompanyName = company };
+					break;
+				case "marketSummary":
+					controllerName = "MarketData";
+					iRequest = new MarketData();
 					break;
 				default:
 					break;

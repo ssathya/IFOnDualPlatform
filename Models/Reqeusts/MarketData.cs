@@ -2,18 +2,16 @@
 
 namespace Models.Reqeusts
 {
-	public class CompanyData : IAppRequest
+	public class MarketData : IAppRequest
 	{
-		public CompanyData()
+		public MarketData()
 		{
 			RequestStart = DateTime.Now;
 			IsSsmlResponseRequested = false;
-			RequestName = "Company Data";
+			RequestName = "Market Data";
 		}
-
 		public string RequestName { get; set; }
 		public DateTime RequestStart { get; set; }
-		public string CompanyName { get; set; }
 		public bool IsSsmlResponseRequested { get; set; }
 	}
 }
