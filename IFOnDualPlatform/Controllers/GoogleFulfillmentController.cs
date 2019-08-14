@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Models.Reqeusts;
 using RestSharp;
 using System.IO;
+using System.Threading.Tasks;
 using Utilities.Application;
 
 namespace IFOnDualPlatform.Controllers
@@ -38,10 +39,15 @@ namespace IFOnDualPlatform.Controllers
 		// POST: api/GoogleFulfillment
 		[HttpPost]
 		//public IActionResult Post([FromBody] WebhookRequest value)
-		public IActionResult Post()
+		public async Task<IActionResult> Post()
 		{
 			_logger.LogDebug("Entering Google Fulfillment Post");
-			string requestBody = new StreamReader(Request.Body).ReadToEndAsync().Result;
+			string requestBody;
+			using (var sr = new StreamReader(Request.Body))
+			{
+				requestBody = await sr.ReadToEndAsync();
+			}
+			// requestBody = new StreamReader(Request.Body).ReadToEndAsync().Result;
 			var value = jsonParser.Parse<WebhookRequest>(requestBody);
 			WebhookResponse response = ProcessWebhookRequests(value);
 			response = CheckAndAddEndOfMessage(response);
