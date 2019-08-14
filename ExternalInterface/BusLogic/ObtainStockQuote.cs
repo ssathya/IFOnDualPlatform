@@ -16,6 +16,7 @@ namespace ExternalInterface.BusLogic
 	public class ObtainStockQuote
 	{
 
+
 		#region Private Fields
 
 		private readonly EnvHandler _envHandler;
@@ -25,8 +26,8 @@ namespace ExternalInterface.BusLogic
 
 		#endregion Private Fields
 
+		#region Public Constructors
 
-		#region Public Constructors		
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ObtainStockQuote"/> class.
 		/// </summary>
@@ -41,7 +42,6 @@ namespace ExternalInterface.BusLogic
 		}
 
 		#endregion Public Constructors
-
 
 		#region Public Methods
 
@@ -63,10 +63,19 @@ namespace ExternalInterface.BusLogic
 			return returnValueMsg;
 		}
 
+		public async Task<string> GetMarketSummary()
+		{
+			_logger.LogTrace("Starting to obtain market summary");
+			var tickersToUse = "^DJI,^IXIC,^INX";
+			var quotes = await GetStockQuotes(tickersToUse);
+			var returnValueMsg = BuildIndexMsg(quotes);
+			return returnValueMsg;
+		}
+
 		#endregion Public Methods
 
+		#region Private Methods
 
-		#region Private Methods		
 		/// <summary>
 		/// Builds the output MSG.
 		/// </summary>
@@ -101,6 +110,32 @@ namespace ExternalInterface.BusLogic
 				tmpStr.Append(quote.Day_change > 0 ? " Up by " : " Down by ");
 				tmpStr.Append($"{(Math.Abs((float)quote.Day_change)).ToString("n2")} points.\n\n ");
 			}
+			return tmpStr.ToString();
+		}
+		/// <summary>
+		/// Builds the index MSG.
+		/// </summary>
+		/// <param name="indexData">The index data.</param>
+		/// <returns></returns>
+		private string BuildIndexMsg(QuotesFromWorldTrading indexData)
+		{
+			StringBuilder tmpStr = new StringBuilder();			
+			if (indexData.Data.Length >= 1)
+			{
+				var dateToUse = indexData.Data[0].Last_trade_time == null ? DateTime.Parse("01-01-2000") :
+					(DateTime)indexData.Data[0].Last_trade_time;
+				tmpStr.Append("As of ");
+				tmpStr.Append($"{dateToUse.ToString("MMMM dd, hh:mm tt")} EST ");
+			}
+			foreach (var idxData in indexData.Data)
+			{
+				float price = idxData.Price != null ? (float)idxData.Price : 0;
+				float dayChange = idxData.Day_change == null ? 0 : (float)idxData.Day_change;
+				tmpStr.Append($"{idxData.Name}  was at  {Math.Round(price, 0)}. ");
+				tmpStr.Append(idxData.Day_change > 0 ? " Up by " : "Down by ");
+				tmpStr.Append($"{Math.Abs(Math.Round(dayChange, 0))} points.\n\n ");
+			}
+
 			return tmpStr.ToString();
 		}
 		/// <summary>
@@ -141,5 +176,6 @@ namespace ExternalInterface.BusLogic
 		}
 
 		#endregion Private Methods
+
 	}
 }
