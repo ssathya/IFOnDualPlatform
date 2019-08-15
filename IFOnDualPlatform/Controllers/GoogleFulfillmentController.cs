@@ -8,6 +8,9 @@ using RestSharp;
 using System.IO;
 using System.Threading.Tasks;
 using Utilities.Application;
+using Utilities.StringHelpers;
+using static Google.Cloud.Dialogflow.V2.Intent.Types;
+using static Google.Cloud.Dialogflow.V2.Intent.Types.Message.Types;
 
 namespace IFOnDualPlatform.Controllers
 {
@@ -74,7 +77,20 @@ namespace IFOnDualPlatform.Controllers
 			}
 			return response;
 		}
-
+		private string CheckAndAddEndOfMessage(string response)
+		{
+			
+			if (response.IsNullOrWhiteSpace())
+			{
+				return "\n\n" + Utility.ErrorReturnMsg() + "\n\n"
+					+ Utility.EndOfCurrentRequest();
+			}
+			else if (!response.Contains(Utility.EndOfCurrentRequest()))
+			{
+				return response + "\n\n" + Utility.EndOfCurrentRequest();
+			}
+			return response;
+		}
 		private WebhookResponse ProcessWebhookRequests(WebhookRequest value)
 		{
 			var intentName = value.QueryResult.Intent.DisplayName;
@@ -86,10 +102,21 @@ namespace IFOnDualPlatform.Controllers
 			var response = responseResult.Data;
 			if (response != null && response.IsResponseSuccess)
 			{
-				var returnValue = new WebhookResponse
+				var returnMsg = response.ResponseData.ConvertAllToASCII();
+				returnMsg = CheckAndAddEndOfMessage(returnMsg);
+				returnMsg = returnMsg.ConvertAllToASCII();												
+				var simpleResponses = new Message
 				{
-					FulfillmentText = response.ResponseData
+					SimpleResponses = new SimpleResponses(),
+					Platform = Platform.ActionsOnGoogle
 				};
+				simpleResponses.SimpleResponses.SimpleResponses_.Add(
+					new SimpleResponse
+					{
+						Ssml = returnMsg.ConvertToSSML()
+					});
+				var returnValue = new WebhookResponse();				
+				returnValue.FulfillmentMessages.Add(simpleResponses);				
 				return returnValue;
 			}
 			return new WebhookResponse
