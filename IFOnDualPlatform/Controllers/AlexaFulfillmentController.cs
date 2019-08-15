@@ -40,10 +40,16 @@ namespace IFOnDualPlatform.Controllers
 		}
 		// POST: api/AlexaFulfillment
 		[HttpPost]
-		public IActionResult Post()
+		public async Task<IActionResult> Post()
 		{
 			_logger.LogDebug("Entering Post request");
-			string json = new StreamReader(Request.Body).ReadToEndAsync().Result;
+			//string json = new StreamReader(Request.Body).ReadToEndAsync().Result;
+			string json;
+			using (var sr = new StreamReader(Request.Body))
+			{
+				json = await sr.ReadToEndAsync();
+			}
+
 			var skillRequest = JsonConvert.DeserializeObject<SkillRequest>(json);
 			var requestType = skillRequest.GetRequestType();
 			SkillResponse response;
