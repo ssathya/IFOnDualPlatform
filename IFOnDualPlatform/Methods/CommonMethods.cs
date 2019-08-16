@@ -106,6 +106,9 @@ namespace IFOnDualPlatform.Methods
 				case "marketSummary":
 					entityOrSlot = "";
 					break;
+				case "recommend":
+					entityOrSlot = "";
+					break;
 				default:
 					return;
 			}
@@ -142,6 +145,9 @@ namespace IFOnDualPlatform.Methods
 					entityOrSlot = company.StripSpecialChar();
 					break;
 				case "marketSummary":
+					entityOrSlot = "";
+					break;
+				case "recommend":
 					entityOrSlot = "";
 					break;
 
@@ -226,6 +232,10 @@ namespace IFOnDualPlatform.Methods
 				case "marketSummary":
 					controllerName = "MarketData";
 					iRequest = new MarketData();
+					break;
+				case "recommend":
+					controllerName = "Recommendations";
+					iRequest = new Recommendations();
 					break;
 				default:
 					break;

@@ -44,6 +44,7 @@ namespace IFOnDualPlatform.Extensions
 			services.AddScoped<ObtainNews>();
 			services.AddScoped<ObtainStockQuote>();
 			services.AddScoped<ResolveCompanyName>();
+			services.AddScoped<ObtainGoodInvestments>();
 		}
 		public static void SetupMappings(this IServiceCollection services)
 		{
