@@ -99,6 +99,7 @@ namespace IFOnDualPlatform.Controllers
 			_commonMethods.ProcessIntends(value, intentName, ref iRequest, ref controllerName);
 			_commonMethods.SetupAPICall(iRequest, controllerName, out RestClient clinet, out RestRequest request, Request);
 			var responseResult = clinet.Execute<AppResponse>(request);
+			_logger.LogInformation("Completed service request");
 			var response = responseResult.Data;
 			if (response != null && response.IsResponseSuccess)
 			{
@@ -119,6 +120,10 @@ namespace IFOnDualPlatform.Controllers
 				returnValue.FulfillmentMessages.Add(simpleResponses);				
 				return returnValue;
 			}
+			_logger.LogError($"{controllerName} could not process request.\n\tDetails:");
+			_logger.LogError($"Input value{value.ToString()}");
+			_logger.LogError($"Value sent as parameter to {controllerName}:\n{iRequest}");
+			_logger.LogError($"Return value if any:{response}");
 			return new WebhookResponse
 			{
 				FulfillmentText = Utility.ErrorReturnMsg() + Utility.EndOfCurrentRequest()

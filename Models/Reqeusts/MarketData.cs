@@ -14,4 +14,16 @@ namespace Models.Reqeusts
 		public DateTime RequestStart { get; set; }
 		public bool IsSsmlResponseRequested { get; set; }
 	}
+	public class Recommendations : IAppRequest
+	{
+		public Recommendations()
+		{
+			RequestName = "Recommendations";
+			RequestStart = DateTime.Now;
+			IsSsmlResponseRequested = false;
+		}
+		public string RequestName { get; set; }
+		public DateTime RequestStart { get; set; }
+		public bool IsSsmlResponseRequested { get; set; }
+	}
 }

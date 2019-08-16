@@ -4,15 +4,15 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Text;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Utilities.Application;
+using Utilities.StringHelpers;
 
 namespace ExternalInterface.BusLogic
 {
-    public class ResolveCompanyName
-    {
+	public class ResolveCompanyName
+	{
 		private readonly ILogger<ResolveCompanyName> _logger;
 		private readonly EnvHandler _envHandler;
 		private static List<SecuritySymbol> symbols;
@@ -24,10 +24,22 @@ namespace ExternalInterface.BusLogic
 
 
 
-		public ResolveCompanyName(ILogger<ResolveCompanyName> logger,  EnvHandler envHandler)
+		public ResolveCompanyName(ILogger<ResolveCompanyName> logger, EnvHandler envHandler)
 		{
 			_logger = logger;
 			_envHandler = envHandler;
+		}
+		public async Task<string> ResolveTicker(string ticker)
+		{
+			symbols = await ObtainSymbolsFromIeXAsync();
+			_logger.LogTrace($"Trying to resolve {ticker}");
+			if (symbols == null || symbols.Count <= 5)
+			{
+				return "";
+			}
+			var companyName = symbols.Find(t => t.Symbol.Equals(ticker)).Name;
+			return companyName.IsNullOrWhiteSpace() ? "" : companyName;
+
 		}
 		public async Task<string> ResolveCompanyNameOrTicker(string companyName)
 		{
@@ -82,22 +94,28 @@ namespace ExternalInterface.BusLogic
 			{
 				return symbols;
 			}
+			if (symbols == null)
+			{
+				symbols = new List<SecuritySymbol>();
+			}
+			else
+			{
+				symbols.Clear();
+			}
 			var urlToUse = iexSymbolListURL.Replace(apiKey, _envHandler.GetApiKey(iexTradingProvider));
 			var url1ToUse = iexOTCSymbolListURL.Replace(apiKey, _envHandler.GetApiKey(iexTradingProvider));
 			try
 			{
-				using (var wc = new WebClient())
+				using (var httpClient = new HttpClient())
 				{
 					string data = "{}";
-					data = await wc.DownloadStringTaskAsync(urlToUse);
-					symbols = JsonConvert.DeserializeObject<IEnumerable<SecuritySymbol>>(data).ToList();
-					if (symbols.Any())
-					{
-						data = "{}";
-						data = await wc.DownloadStringTaskAsync(url1ToUse);
-						var symbols1 = JsonConvert.DeserializeObject<IEnumerable<SecuritySymbol>>(data).ToList();
-						symbols.AddRange(symbols1);
-					}
+					data = await httpClient.GetStringAsync(urlToUse);
+					var symbols0 = JsonConvert.DeserializeObject<IEnumerable<SecuritySymbol>>(data).ToList();
+					symbols.AddRange(symbols0);
+					var data1 = "{}";
+					data1 = await httpClient.GetStringAsync(url1ToUse);
+					var symbols1 = JsonConvert.DeserializeObject<IEnumerable<SecuritySymbol>>(data1).ToList();
+					symbols.AddRange(symbols1);
 					lastSymbolUpdate = DateTime.Now;
 					return symbols;
 				}
