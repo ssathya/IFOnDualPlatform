@@ -82,8 +82,7 @@ namespace IFOnDualPlatform.Controllers
 			
 			if (response.IsNullOrWhiteSpace())
 			{
-				return "\n\n" + Utility.ErrorReturnMsg() + "\n\n"
-					+ Utility.EndOfCurrentRequest();
+				return "\n\n" + Utility.ErrorReturnMsg();
 			}
 			else if (!response.Contains(Utility.EndOfCurrentRequest()))
 			{
