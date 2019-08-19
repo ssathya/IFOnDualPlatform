@@ -82,6 +82,22 @@ namespace ExternalInterface.BusLogic
 			}
 			if (!tick.Any())
 			{
+				//Try replacing " and " with " & "
+				if (localCompanyName.ToLower().Contains(" and "))
+				{
+					var newLocalCompanyName = localCompanyName.Replace(" and ", " & ");
+					var returnValue = await ResolveCompanyNameOrTicker(newLocalCompanyName);
+					if (!returnValue.IsNullOrWhiteSpace())
+					{
+						return returnValue;
+					}
+					newLocalCompanyName = localCompanyName.Replace(" and ", "&");
+					returnValue = await ResolveCompanyNameOrTicker(newLocalCompanyName);
+					if (!returnValue.IsNullOrWhiteSpace())
+					{
+						return returnValue;
+					}
+				}
 				return "";
 			}
 			string returnString = tick.Aggregate((i, j) => i + "," + j);

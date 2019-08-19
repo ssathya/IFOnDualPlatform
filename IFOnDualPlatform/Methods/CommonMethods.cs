@@ -22,18 +22,18 @@ namespace IFOnDualPlatform.Methods
 		<s>
 		<break strength='strong'/>
 		<break strength='medium'/>Phrases that Index flux understands are
-		<voice name='Matthew'>How is the market doing? Get me the quote for GOOG, What is the latest price for Citigroup</voice>, etc. The application can get the quotes for all listed firms
+		<voice name='Matthew'>Get me market summary? Get me the quote for GOOG, get me the price for IBM</voice>, etc. The application can get the quotes for all listed firms
 		<break strength='medium'/>
 		<break strength='strong'/>
 		<break strength='medium'/>Index Flux can also analyze a firm’s fundamentals for you. To get a firm’s fundamentals say
-		<voice name='Matthew'>Please get me the basic information about General Electric or What are the fundamentals for Best Buy</voice>.
+		<voice name='Matthew'>What are the fundamentals for  General Electric or What are the fundamentals for Best Buy</voice>.
 		<break strength='weak'/> Currently, Index Flux analyzes around 2400 firms but the list is growing.
 		<break time='1s'/>
 		</s>
 		<s>
-		<break strength='medium'/>Try your luck; ask me
-		<voice name='Matthew'>Get me some recommendations</voice> or
-		<voice name='Matthew'>Recommend me some stocks to research</voice>
+		<break strength='medium'/>Index Flux can also give you investment ideas; ask me
+		<voice name='Matthew'>Get me some stocks you recommend</voice> or
+		<voice name='Matthew'>Give me some recommendations</voice>
 		</s>
 		<s>
 		<break time='1s'/>
@@ -44,7 +44,7 @@ namespace IFOnDualPlatform.Methods
 		<s>
 		<break time='1s'/>
 		<break strength='medium'/>You can quit the application by saying
-		<prosody pitch='high'>bye, see you, or thank you</prosody>
+		<prosody pitch='high'>bye</prosody>
 		</s>
 		</speak>";
 		private readonly string[] fallbackMsgs =

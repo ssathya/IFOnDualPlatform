@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using Models.Reqeusts;
 using Newtonsoft.Json;
 using RestSharp;
+using Utilities.Application;
 using Utilities.StringHelpers;
 
 namespace IFOnDualPlatform.Controllers
@@ -87,6 +88,7 @@ namespace IFOnDualPlatform.Controllers
 			if (response != null && response.IsResponseSuccess)
 			{
 				var returnMsg = response.ResponseData.ConvertAllToASCII();
+				returnMsg = CheckAndAddEndOfMessage(returnMsg);
 				returnMsg = returnMsg.ConvertToSSML();
 				var speech = new SsmlOutputSpeech
 				{
@@ -97,7 +99,7 @@ namespace IFOnDualPlatform.Controllers
 			}
 			else
 			{
-				_logger.LogError("Error while parsing this request:");
+				_logger.LogError("Error while parsing  request:");
 				_logger.LogError(skillRequest.ToString());
 				skillResponse = ErrorRequestHandler(intentName);
 			}
@@ -108,15 +110,27 @@ namespace IFOnDualPlatform.Controllers
 		{
 			SkillResponse skillResponse;
 			var returnMsg = new StringBuilder();
-			returnMsg.Append("Not sure how we came here; we worked hard to capture all scenarios.\n");
-			returnMsg.Append($"Your request came with the intent name {intentName} which was not authored\n");
-			returnMsg.Append($"Would appriciate if you would report this major bug stating that your intent was {intentName}");
+			returnMsg.Append("An internal error occurred.\n");
+			returnMsg.Append($"Your request came with the intent name {intentName}.\n");
+			returnMsg.Append($"We'll end this session now; please visit again for better interaction. Thank you and sorry for disappointing you.");
 			skillResponse = ResponseBuilder.Tell(returnMsg.ToString());
-			_logger.LogDebug(returnMsg.ToString());
-			skillResponse.Response.ShouldEndSession = false;
+			_logger.LogCritical(returnMsg.ToString());
+			skillResponse.Response.ShouldEndSession = true;
 			return skillResponse;
 		}
+		private string CheckAndAddEndOfMessage(string response)
+		{
 
+			if (response.IsNullOrWhiteSpace())
+			{
+				return "\n\n" + Utility.ErrorReturnMsg();
+			}
+			else if (!response.Contains(Utility.EndOfCurrentRequest()))
+			{
+				return response + "\n\n" + Utility.EndOfCurrentRequest();
+			}
+			return response;
+		}
 		private  SkillResponse LaunchRequestHandler()
 		{
 			var seeker = rnd.Next(greetings.Length);
