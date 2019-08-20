@@ -105,7 +105,12 @@ namespace ExternalInterface.BusLogic
 				{
 					string data = "{}";
 					data = await hc.GetStringAsync(urlToUse);
-					var companyOverview = JsonConvert.DeserializeObject<CompanyKeyStats>(data);
+					var settings = new JsonSerializerSettings
+					{
+						NullValueHandling = NullValueHandling.Ignore,
+						MissingMemberHandling = MissingMemberHandling.Ignore
+					};
+					var companyOverview = JsonConvert.DeserializeObject<CompanyKeyStats>(data, settings);
 					return companyOverview;
 				}
 			}

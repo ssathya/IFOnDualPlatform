@@ -126,11 +126,16 @@ namespace ExternalInterface.BusLogic
 				{
 					string data = "{}";
 					data = await httpClient.GetStringAsync(urlToUse);
-					var symbols0 = JsonConvert.DeserializeObject<IEnumerable<SecuritySymbol>>(data).ToList();
+					var settings = new JsonSerializerSettings
+					{
+						NullValueHandling = NullValueHandling.Ignore,
+						MissingMemberHandling = MissingMemberHandling.Ignore
+					};
+					var symbols0 = JsonConvert.DeserializeObject<IEnumerable<SecuritySymbol>>(data,settings).ToList();
 					symbols.AddRange(symbols0);
 					var data1 = "{}";
 					data1 = await httpClient.GetStringAsync(url1ToUse);
-					var symbols1 = JsonConvert.DeserializeObject<IEnumerable<SecuritySymbol>>(data1).ToList();
+					var symbols1 = JsonConvert.DeserializeObject<IEnumerable<SecuritySymbol>>(data1, settings).ToList();
 					symbols.AddRange(symbols1);
 					lastSymbolUpdate = DateTime.Now;
 					return symbols;

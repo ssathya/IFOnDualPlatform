@@ -53,7 +53,12 @@ namespace ExternalInterface.BusLogic
 				{
 					data = await wc.DownloadStringTaskAsync(urlToUse);
 				}
-				var newsData = JsonConvert.DeserializeObject<NewsExtract>(data);
+				var settings = new JsonSerializerSettings
+				{
+					NullValueHandling = NullValueHandling.Ignore,
+					MissingMemberHandling = MissingMemberHandling.Ignore
+				};
+				var newsData = JsonConvert.DeserializeObject<NewsExtract>(data, settings);
 				var returnString = new StringBuilder();
 				returnString.Append($"Here are the latest news about {companyName}");
 				var publishedDate = DateTime.Now.AddYears(-1);
@@ -143,7 +148,12 @@ namespace ExternalInterface.BusLogic
 				{
 					data = await wc.DownloadStringTaskAsync(urlToUse);
 				}
-				var newsData = JsonConvert.DeserializeObject<NewsExtract>(data);
+				var settings = new JsonSerializerSettings
+				{
+					NullValueHandling = NullValueHandling.Ignore,
+					MissingMemberHandling = MissingMemberHandling.Ignore
+				};
+				var newsData = JsonConvert.DeserializeObject<NewsExtract>(data, settings);
 				return newsData;
 			}
 			catch (Exception ex)

@@ -121,7 +121,12 @@ namespace ExternalInterface.BusLogic
 				{
 					string data = "[]";
 					data = await wc.DownloadStringTaskAsync(urlToUseForAnalystRating);
-					var ratingsArray = JsonConvert.DeserializeObject<IEnumerable<Ratings>>(data).ToList();
+					var settings = new JsonSerializerSettings
+					{
+						NullValueHandling = NullValueHandling.Ignore,
+						MissingMemberHandling = MissingMemberHandling.Ignore
+					};
+					var ratingsArray = JsonConvert.DeserializeObject<IEnumerable<Ratings>>(data,settings).ToList();
 					if (ratingsArray == null || !ratingsArray.Any())
 					{
 						return "";
@@ -198,7 +203,7 @@ namespace ExternalInterface.BusLogic
 			{
 				case "cs":
 					returnText.Append(BuildCommonStockMessage(computedRating, symbol));
-					returnText.Append(await BuildAnalystsRatings(ticker));
+					//1returnText.Append(await BuildAnalystsRatings(ticker));
 					break;
 
 				case "ad":
@@ -265,7 +270,12 @@ namespace ExternalInterface.BusLogic
 				{
 					string data = "{}";
 					data = await wc.DownloadStringTaskAsync(urlToUse);
-					var companyOverview = JsonConvert.DeserializeObject<CompanyOverview>(data);
+					var settings = new JsonSerializerSettings
+					{
+						NullValueHandling = NullValueHandling.Ignore,
+						MissingMemberHandling = MissingMemberHandling.Ignore
+					};
+					var companyOverview = JsonConvert.DeserializeObject<CompanyOverview>(data,settings);
 					return companyOverview;
 				}
 			}
@@ -291,7 +301,12 @@ namespace ExternalInterface.BusLogic
 				{
 					string data = "{}";
 					data = await wc.DownloadStringTaskAsync(urlToUse);
-					var companyOverview = JsonConvert.DeserializeObject<CompanyKeyStats>(data);
+					var settings = new JsonSerializerSettings
+					{
+						NullValueHandling = NullValueHandling.Ignore,
+						MissingMemberHandling = MissingMemberHandling.Ignore
+					};
+					var companyOverview = JsonConvert.DeserializeObject<CompanyKeyStats>(data, settings);
 					return companyOverview;
 				}
 			}
