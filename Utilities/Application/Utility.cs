@@ -30,12 +30,12 @@ namespace Utilities.Application
 
 		public static string EndOfCurrentRequest()
 		{
-			return "\nAnything more? For help say help or say 'bye bye' to quit\n";
+			return "Anything more? For help say help or say 'bye' to quit\n";
 		}
 
 		public static string ErrorReturnMsg()
 		{
-			return "\nWe are experiencing issues obtaining data; be assured we'll resolve as soon as possible\n" +
+			return "We are experiencing issues obtaining data; be assured we'll resolve as soon as possible\n" +
 				EndOfCurrentRequest();
 		}
 
