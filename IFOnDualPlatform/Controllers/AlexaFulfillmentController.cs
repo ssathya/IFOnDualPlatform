@@ -81,6 +81,7 @@ namespace IFOnDualPlatform.Controllers
 			_commonMethods.ProcessIntends(skillRequest, ref skillResponse, intentName, ref iRequest, ref controllerName);
 			if (skillResponse != null)
 			{
+				skillResponse.SessionAttributes = skillRequest.Session.Attributes;
 				return skillResponse;
 			}
 			_commonMethods.SetupAPICall(iRequest, controllerName, out RestClient clinet, out RestRequest request, Request);
@@ -94,7 +95,7 @@ namespace IFOnDualPlatform.Controllers
 				{
 					Ssml = returnMsg
 				};
-				skillResponse = ResponseBuilder.Tell(speech);
+				skillResponse = ResponseBuilder.Tell(speech, skillRequest.Session);							
 				skillResponse.Response.ShouldEndSession = response.ShouldEndSession;
 			}
 			else
@@ -102,7 +103,8 @@ namespace IFOnDualPlatform.Controllers
 				_logger.LogError("Error while parsing  request:");
 				_logger.LogError(skillRequest.ToString());
 				skillResponse = ErrorRequestHandler(intentName);
-			}
+				skillResponse.SessionAttributes = skillRequest.Session.Attributes;
+			}			
 			return skillResponse;
 		}
 

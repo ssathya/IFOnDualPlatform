@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Models.Mongo;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,5 +23,9 @@ namespace Models.Application
 		public string Region { get; set; }
 		public string Currency { get; set; }
 		public bool IsEnabled { get; set; }
+	}
+	public class SecuritySymbolMd : SecuritySymbol, IBaseModel
+	{
+		public string Id { get; set; }
 	}
 }
