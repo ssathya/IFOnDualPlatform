@@ -37,6 +37,7 @@ namespace Utilities.StringHelpers
 			return newStringBuilder.ToString();
 		}
 
+		
 		/// <summary>
 		/// Converts string to SSML.
 		/// </summary>
@@ -113,6 +114,16 @@ namespace Utilities.StringHelpers
 			RegexOptions options = RegexOptions.Multiline;
 			Regex regex = new Regex(pattern, options);
 			var stripped = regex.Replace(text, substitution);
+			return stripped;
+		}
+		public static string RemovePunctuations(this string inString)
+		{
+			string pattern = @"[^\w\s]";
+			string substitution = @"";			
+			RegexOptions options = RegexOptions.Multiline;
+
+			Regex regex = new Regex(pattern, options);
+			var stripped = regex.Replace(inString, substitution);
 			return stripped;
 		}
 

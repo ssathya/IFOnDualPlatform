@@ -55,7 +55,7 @@ namespace ExternalInterface.BusLogic
 			var tickersToUse = await _resolveCompanyName.ResolveCompanyNameOrTicker(companyName);
 			if (tickersToUse.IsNullOrWhiteSpace())
 			{
-				return "";
+				return $"We could not resolve ticker/company Name {companyName}";
 			}
 			var quotes = await GetStockQuotes(tickersToUse);
 			var returnValueMsg = BuildOutputMsg(quotes);
