@@ -179,12 +179,11 @@ namespace IFOnDualPlatform.Methods
 				case "StopIntent":
 				case "AMAZON.NavigateHomeIntent":
 				case "NavigateHomeIntent":
+				default:
 					seeker = rnd.Next(stopMsgs.Length);
 					response = ResponseBuilder.Tell(stopMsgs[seeker]);
 					response.Response.ShouldEndSession = true;
 					_logger.LogDebug("Ending user session");
-					return;
-				default:
 					return;
 			}
 			ProcessIntends(entityOrSlot, intentName, ref iRequest, ref controllerName);
