@@ -40,21 +40,31 @@ namespace Utilities.StringHelpers
 		/// <summary>
 		/// Converts string to SSML.
 		/// </summary>
-		/// <param name="unformatedMsg">The unformated MSG.</param>
+		/// <param name="unformattedMsg">The unformatted MSG.</param>
 		/// <returns></returns>
-		public static string ConvertToSSML(this string unformatedMsg)
+		public static string ConvertToSSML(this string unformatted)
 		{
 
 			StringBuilder tempValue = new StringBuilder();
-			unformatedMsg = unformatedMsg.Replace("&", " and ")
+			unformatted = unformatted.Replace("&", " and ")
 				.Replace(">", " greater than ")
 				.Replace("<", " less than ")
 				.Replace("'", "")
 				.Replace("\"", "");
 			tempValue.Append("<speak>");
-			tempValue.Append(unformatedMsg);
+			tempValue.Append(unformatted);
 			tempValue.Append("</speak>");
-			var retValue = Regex.Replace(tempValue.ToString(), @"\r\n?|\n|\\n|\\r\\n", @"<break time='750ms'/>");
+			var retValue = Regex.Replace(tempValue.ToString(), @"\r\n?|\n|\\n|\\r\\n", @"<break time='250ms'/>");
+			//remove too may breaks
+			string pattern = @"<break time='250ms'\/>\s*<break time='250ms'\/>";
+			string substitution = @"<break time='250ms'/>";
+			RegexOptions options = RegexOptions.Multiline;
+			Regex regex = new Regex(pattern, options);
+			for (int i = 0; i < 3; i++)
+			{				
+				retValue = regex.Replace(retValue, substitution);
+			}
+
 			return retValue;
 		}
 

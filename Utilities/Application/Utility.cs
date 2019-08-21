@@ -16,18 +16,7 @@ namespace Utilities.Application
 
 		#region Public Methods
 
-		public static string ConvertToSSML(string unformatedMsg)
-		{
-			StringBuilder tempValue = new StringBuilder();
-			tempValue.Append("<speak>");
-			tempValue.Append(unformatedMsg);
-			tempValue.Append("</speak>");
-			tempValue.Replace("\r", "");
-			tempValue.Replace("\n\n", "\n");
-			tempValue.Replace("\n", @"<break strength='x - strong' time='500ms' />");
-			return tempValue.ToString();
-		}
-
+		
 		public static string EndOfCurrentRequest()
 		{
 			return "Anything more? For help say help or say 'bye' to quit\n";
