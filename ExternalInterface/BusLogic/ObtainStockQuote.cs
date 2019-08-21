@@ -92,10 +92,15 @@ namespace ExternalInterface.BusLogic
 				using (var httpClient = new HttpClient())
 				{
 					data = await httpClient.GetStringAsync(urlStr);
-				}
-				var parsedData = JObject.Parse(data);
-				data = data.Replace(":\"N/A\"", ":0.0");
-				var indexData = JsonConvert.DeserializeObject<QuotesFromWorldTrading>(data);
+				}				
+				data = data.Replace(":\"N/A\"", ":null");
+				var settings = new JsonSerializerSettings
+				{
+					NullValueHandling = NullValueHandling.Ignore,
+					MissingMemberHandling = MissingMemberHandling.Ignore,
+					
+				};
+				var indexData = JsonConvert.DeserializeObject<QuotesFromWorldTrading>(data,settings);
 				return indexData;
 			}
 			catch (Exception ex)
