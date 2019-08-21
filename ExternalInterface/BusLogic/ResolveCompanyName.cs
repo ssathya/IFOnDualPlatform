@@ -98,7 +98,16 @@ namespace ExternalInterface.BusLogic
 						return returnValue;
 					}
 				}
-				return "";
+				else if (localCompanyName.Count(f => f == ' ') == 1) //handle sales force to Salesforce
+				{
+					var newLocalCompanyName = localCompanyName.Replace(" and ", " & ");
+					var returnValue = await ResolveCompanyNameOrTicker(newLocalCompanyName);
+					return returnValue;
+				}
+				else
+				{
+					return "";
+				}
 			}
 			string returnString = tick.Aggregate((i, j) => i + "," + j);
 			_logger.LogTrace($"Company name {companyName} was resolved as {returnString}");
