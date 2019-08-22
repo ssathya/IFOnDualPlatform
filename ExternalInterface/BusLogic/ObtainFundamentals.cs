@@ -65,7 +65,8 @@ namespace ExternalInterface.BusLogic
 			var tickersToUse = await _resolveCompanyName.ResolveCompanyNameOrTicker(companyName);
 			if (tickersToUse.IsNullOrWhiteSpace())
 			{
-				return "";
+				return $"We could not resolve ticker/company Name {companyName}; possible reason Google registered name is Alphabet Inc.\n\n" +
+					$"Hint: try with symbol or ticker";
 			}
 			var fulfillmentText = new StringBuilder();
 
