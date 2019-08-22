@@ -67,17 +67,17 @@ namespace ExternalInterface.BusLogic
 					if (article.title.IsEnglish())
 					{
 						if (publishedDate.Date != article.publishedAt.Date)
-						{
-							if (returnString.Length >= 500)
-							{
-								break;
-							}
+						{							
 							publishedDate = article.publishedAt;
 							var dateStr = publishedDate.ToString("MMMM dd");
-							returnString.Append($". \r\nThe followin were published on {dateStr}.\r\n");
+							returnString.Append($". \r\nThe following were published on {dateStr}.\r\n");
 						}
 						returnString.Append(article.title);
 						returnString.Append(".\r\n");
+					}
+					if (returnString.Length >= 500)
+					{
+						break;
 					}
 				}
 				return returnString.ToString();
