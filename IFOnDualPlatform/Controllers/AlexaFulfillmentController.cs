@@ -10,8 +10,10 @@ using Alexa.NET.Request.Type;
 using Alexa.NET.Response;
 using IFOnDualPlatform.Methods;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using Models.Reqeusts;
 using Newtonsoft.Json;
 using RestSharp;
@@ -45,15 +47,20 @@ namespace IFOnDualPlatform.Controllers
 		{
 			_logger.LogDebug("Entering Post request");
 			//string json = new StreamReader(Request.Body).ReadToEndAsync().Result;
-			string json;
+			string json;			
 			using (var sr = new StreamReader(Request.Body))
 			{
 				json = await sr.ReadToEndAsync();
 			}
-
+			SkillResponse response;			
 			var skillRequest = JsonConvert.DeserializeObject<SkillRequest>(json);
+			var isValid = await ValidateRequest(Request, _logger, skillRequest, json);
+			if (!isValid)
+			{
+				return new BadRequestResult();
+			}
 			var requestType = skillRequest.GetRequestType();
-			SkillResponse response;
+			
 			if (requestType == typeof(LaunchRequest))
 			{
 				response = LaunchRequestHandler();				
@@ -139,6 +146,48 @@ namespace IFOnDualPlatform.Controllers
 			SkillResponse response = ResponseBuilder.Tell(greetings[seeker]);
 			response.Response.ShouldEndSession = false;
 			return response;
+		}
+		private static async Task<bool> ValidateRequest(HttpRequest request, ILogger log, SkillRequest skillRequest, string body)
+		{
+			request.Headers.TryGetValue("SignatureCertChainUrl", out var signatureChainUrl);
+			if (string.IsNullOrWhiteSpace(signatureChainUrl))
+			{
+				log.LogError("Validation failed. Empty SignatureCertChainUrl header");
+				return false;
+			}
+			Uri certUrl;
+			try
+			{
+				certUrl = new Uri(signatureChainUrl);
+			}
+			catch (Exception ex)
+			{
+				log.LogError($"Validation failed. SignatureChainUrl not valid: {signatureChainUrl}");
+				log.LogError(ex.Message);
+				return false;
+			}
+			request.Headers.TryGetValue("Signature", out var signature);
+			if (string.IsNullOrWhiteSpace(signature))
+			{
+				log.LogError("Validation failed - Empty Signature header");
+				return false;
+			}			
+			if (body.IsNullOrWhiteSpace())
+			{
+				log.LogError("Validation failed - the JSON is empty");
+				return false;
+			}
+			bool isTimestampValid = RequestVerification.RequestTimestampWithinTolerance(skillRequest);
+			bool valid = await RequestVerification.Verify(signature, certUrl, body);
+			if (!valid || !isTimestampValid)
+			{
+				log.LogError("Validation failed - RequestVerification failed");
+				return false;
+			}
+			else
+{
+				return true;
+			}
 		}
 	}
 }
