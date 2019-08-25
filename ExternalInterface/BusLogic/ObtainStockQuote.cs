@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using Models.MarketData;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -16,11 +16,15 @@ namespace ExternalInterface.BusLogic
 	public class ObtainStockQuote
 	{
 
+
 		#region Private Fields
 
+		private const string apiKey = "{api-key}";
+		private const string iexTradingProvider = "IEXTrading";
 		private readonly EnvHandler _envHandler;
 		private readonly ILogger<ObtainStockQuote> _logger;
 		private readonly ResolveCompanyName _resolveCompanyName;
+		private readonly string iexCompanyQuoteURL = @"https://cloud.iexapis.com/stable/stock/{ticker}/quote?token={api-key}";
 		private readonly string quotesAPI = @"https://www.worldtradingdata.com/api/v1/stock?symbol={tickersToUse}&api_token={apiKey}";
 
 		#endregion Private Fields
@@ -59,10 +63,23 @@ namespace ExternalInterface.BusLogic
 					$"Hint: try with symbol or ticker";
 			}
 			var quotes = await GetStockQuotes(tickersToUse);
-			var returnValueMsg = BuildOutputMsg(quotes);
+			string returnValueMsg;
+			if (quotes != null && quotes.Data != null && quotes.Data.Any())
+			{
+				returnValueMsg = BuildOutputMsg(quotes);
+				return returnValueMsg;
+			}
+			var wtQuotes = await GetStockQuotesFromWT(tickersToUse);
+			returnValueMsg = BuildOutputMsg(wtQuotes);
+			if (returnValueMsg.IsNullOrWhiteSpace())
+			{
+				return $"We tried; but couldn't get the quotes for {companyName}";
+			}
 			return returnValueMsg;
 		}
 
+		/// <summary>Gets the market summary.</summary>
+		/// <returns>Task&lt;string&gt;</returns>
 		public async Task<string> GetMarketSummary()
 		{
 			_logger.LogTrace("Starting to obtain market summary");
@@ -93,15 +110,14 @@ namespace ExternalInterface.BusLogic
 				using (var httpClient = new HttpClient())
 				{
 					data = await httpClient.GetStringAsync(urlStr);
-				}				
+				}
 				data = data.Replace(":\"N/A\"", ":null");
 				var settings = new JsonSerializerSettings
 				{
 					NullValueHandling = NullValueHandling.Ignore,
 					MissingMemberHandling = MissingMemberHandling.Ignore,
-					
 				};
-				var indexData = JsonConvert.DeserializeObject<QuotesFromWorldTrading>(data,settings);
+				var indexData = JsonConvert.DeserializeObject<QuotesFromWorldTrading>(data, settings);
 				return indexData;
 			}
 			catch (Exception ex)
@@ -161,7 +177,13 @@ namespace ExternalInterface.BusLogic
 
 			var dateToUse = (DateTime)datumToUse.First().Last_trade_time != null ?
 				(DateTime)datumToUse.First().Last_trade_time : DateTime.Parse("01-01-2000");
-
+			if (DateTime.Now.AddDays(-4) > dateToUse)
+			{
+				var symbol = Regex.Replace(datumToUse.First().Symbol, ".{1}", "$0 ");
+				var company = datumToUse.First().Name;
+				return $"Believe {company} with symbol {symbol} was last traded more " +
+					"than 4 days ago; nothing to report now\n";
+			}
 			tmpStr.Append($"As of {dateToUse.ToString("MMMM dd, hh:mm tt")} EST ");
 			foreach (var quote in quotes.Data)
 			{
@@ -180,6 +202,83 @@ namespace ExternalInterface.BusLogic
 				tmpStr.Append($"{(Math.Abs((float)quote.Day_change)).ToString("n2")} points.\n\n ");
 			}
 			return tmpStr.ToString();
+		}
+
+		/// <summary>Builds the output MSG.</summary>
+		/// <param name="wtQuotes">The wt quotes.</param>
+		/// <returns>Output message</returns>
+		private string BuildOutputMsg(List<QuotesFromIexCloud> wtQuotes)
+		{
+			if (!wtQuotes.Any())
+			{
+				return "";
+			}
+			try
+			{
+				var tmpStr = new StringBuilder();
+				var wtq = wtQuotes.OrderByDescending(r => r.LatestUpdate != null ? r.LatestUpdate : r.IexLastUpdated);
+				var reportingUnxTime = wtq.First().LatestUpdate != null ? (long)wtq.First().LatestUpdate : (long)wtq.First().IexLastUpdated;
+				if (reportingUnxTime == 0)
+				{
+					return "";
+				}
+				var reportingTimeOffset = DateTimeOffset.FromUnixTimeMilliseconds(reportingUnxTime);
+				TimeZoneInfo easternZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+				DateTime reportingTime = reportingTimeOffset.DateTime;				
+				DateTime easternTime = TimeZoneInfo.ConvertTimeFromUtc(reportingTime, easternZone);
+				tmpStr.Append($"As of {easternTime.ToString("MMMM dd, hh:mm tt")} EST ");
+				foreach (var quotesFromIexCloud in wtq)
+				{
+					float price = quotesFromIexCloud.LatestPrice != null ? (float)quotesFromIexCloud.LatestPrice : 0;
+					float change = quotesFromIexCloud.Change != null ? (float)quotesFromIexCloud.Change : 0;
+					var symbol = Regex.Replace(quotesFromIexCloud.Symbol, ".{1}", "$0 ");
+					tmpStr.Append($"{quotesFromIexCloud.CompanyName} with ticker {symbol} was traded at {price.ToString("c2")}.");
+					tmpStr.Append(change > 0 ? " Up by " : " Down by ");
+					tmpStr.Append($"{(Math.Abs((float)change)).ToString("n2")} points.\n\n ");
+				}
+				return tmpStr.ToString();
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("Error while building message  for stock quote");
+				_logger.LogError(ex.Message);
+				return "";
+			}
+		}
+
+		/// <summary>Gets the stock quotes from wt.</summary>
+		/// <param name="tickersToUse">The tickers to use.</param>
+		/// <returns>List&lt;QuotesFromIexCloud&gt;</returns>
+		private async Task<List<QuotesFromIexCloud>> GetStockQuotesFromWT(string tickersToUse)
+		{
+			var apiKeyToUse = _envHandler.GetApiKey(iexTradingProvider);
+			var returnValues = new List<QuotesFromIexCloud>();
+			var settings = new JsonSerializerSettings
+			{
+				NullValueHandling = NullValueHandling.Ignore,
+				MissingMemberHandling = MissingMemberHandling.Ignore,
+			};
+			try
+			{
+				foreach (var ticker in tickersToUse.Split(','))
+				{
+					var urlToUse = iexCompanyQuoteURL.Replace("{ticker}", ticker)
+					.Replace(apiKey, apiKeyToUse);
+					string data = "{}";
+					using (var httpClient = new HttpClient())
+					{
+						data = await httpClient.GetStringAsync(urlToUse);
+					}
+					returnValues.Add(JsonConvert.DeserializeObject<QuotesFromIexCloud>(data, settings));
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("Error while obtaining or parsing values from IEX Cloud");
+				_logger.LogError(ex.Message);
+				return returnValues;
+			}
+			return returnValues;
 		}
 
 		#endregion Private Methods

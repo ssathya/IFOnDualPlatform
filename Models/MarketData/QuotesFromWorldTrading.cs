@@ -38,4 +38,5 @@ namespace Models.MarketData
 		public string Gmt_offset { get; set; }
 		public DateTime? Last_trade_time { get; set; }
 	}
+
 }
