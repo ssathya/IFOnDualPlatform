@@ -29,7 +29,7 @@ namespace IFOnDualPlatform.Controllers
 		private readonly ILogger<AlexaFulfillmentController> _logger;
 		private readonly Random rnd;
 
-		private string[] greetings = {
+		private readonly string[] greetings = {
 			"Welcome. If you need help just say help for available commands. What can I do for you now?",
 			"I can get you market data. If you need assistance just say help. What do you want to do now?",
 			"Welcome. Do you want to get market data? If you do not know how to use this feature just say help! How can I assist?"
