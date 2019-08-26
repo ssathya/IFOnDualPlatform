@@ -133,7 +133,24 @@ namespace ExternalInterface.BusLogic
 
 		#endregion Public Methods
 
+
 		#region Private Methods
+
+		private TimeZoneInfo BuildESTTimeZone()
+		{
+			TimeZoneInfo timeZoneInfo = null;
+			try
+			{
+				timeZoneInfo = TZConvert.GetTimeZoneInfo("Eastern Standard Time");
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("Eastern Standard Time failed trying America/New_York");
+				_logger.LogError($"Came here with the exception {ex.Message}");
+				TZConvert.GetTimeZoneInfo("America/New_York");
+			}
+			return timeZoneInfo;
+		}
 
 		/// <summary>
 		/// Builds the index MSG.
@@ -246,23 +263,6 @@ namespace ExternalInterface.BusLogic
 				return "";
 			}
 		}
-
-		private TimeZoneInfo BuildESTTimeZone()
-		{
-			TimeZoneInfo timeZoneInfo = null;
-			try
-			{
-				timeZoneInfo = TZConvert.GetTimeZoneInfo("Eastern Standard Time");
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError("Eastern Standard Time failed trying America/New_York");
-				_logger.LogError($"Came here with the exception {ex.Message}");
-				TZConvert.GetTimeZoneInfo("America/New_York");				
-			}
-			return timeZoneInfo;
-		}
-
 		/// <summary>Gets the stock quotes from wt.</summary>
 		/// <param name="tickersToUse">The tickers to use.</param>
 		/// <returns>List&lt;QuotesFromIexCloud&gt;</returns>
@@ -299,5 +299,6 @@ namespace ExternalInterface.BusLogic
 		}
 
 		#endregion Private Methods
+
 	}
 }
