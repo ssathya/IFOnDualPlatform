@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using TimeZoneConverter;
 using Utilities.Application;
 using Utilities.StringHelpers;
 
@@ -223,8 +224,8 @@ namespace ExternalInterface.BusLogic
 					return "";
 				}
 				var reportingTimeOffset = DateTimeOffset.FromUnixTimeMilliseconds(reportingUnxTime);
-				TimeZoneInfo easternZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
-				DateTime reportingTime = reportingTimeOffset.DateTime;				
+				TimeZoneInfo easternZone = BuildESTTimeZone();
+				DateTime reportingTime = reportingTimeOffset.DateTime;
 				DateTime easternTime = TimeZoneInfo.ConvertTimeFromUtc(reportingTime, easternZone);
 				tmpStr.Append($"As of {easternTime.ToString("MMMM dd, hh:mm tt")} EST ");
 				foreach (var quotesFromIexCloud in wtq)
@@ -244,6 +245,22 @@ namespace ExternalInterface.BusLogic
 				_logger.LogError(ex.Message);
 				return "";
 			}
+		}
+
+		private TimeZoneInfo BuildESTTimeZone()
+		{
+			TimeZoneInfo timeZoneInfo = null;
+			try
+			{
+				timeZoneInfo = TZConvert.GetTimeZoneInfo("Eastern Standard Time");
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("Eastern Standard Time failed trying America/New_York");
+				_logger.LogError($"Came here with the exception {ex.Message}");
+				TZConvert.GetTimeZoneInfo("America/New_York");				
+			}
+			return timeZoneInfo;
 		}
 
 		/// <summary>Gets the stock quotes from wt.</summary>
